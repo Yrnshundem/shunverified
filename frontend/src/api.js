@@ -1,9 +1,14 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+// Use REACT_APP_API_URL (consistent with Vercel settings)
+const API_URL = process.env.REACT_APP_API_URL;
+
+// Fallback to localhost only if in development mode
+const isDevelopment = process.env.NODE_ENV === 'development';
+const baseURL = isDevelopment ? 'http://localhost:5000' : API_URL;
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: baseURL || '', // Ensure no undefined baseURL in production
 });
 
 api.interceptors.request.use((config) => {
