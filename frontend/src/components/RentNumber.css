@@ -1,0 +1,89 @@
+.rent-container {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 24rem;
+  margin: 2rem auto;
+}
+
+.rent-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1e40af;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.error-message {
+  color: #dc2626;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.rent-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rent-select {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+}
+
+.rent-select:focus {
+  outline: none;
+  border-color: #1e40af;
+  box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+}
+
+.rent-btn {
+  background-color: #1e40af;
+  color: #ffffff;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.rent-btn:hover {
+  background-color: #1e3a8a;
+}
+
+.rent-success {
+  text-align: center;
+  color: #10b981;
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .rent-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .rent-title {
+    font-size: 1.25rem;
+  }
+}
+.rent-success {
+  margin-top: 1rem;
+  color: green;
+}
+.copy-btn {
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.copy-btn:hover {
+  background-color: #45a049;
+}

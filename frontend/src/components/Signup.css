@@ -1,0 +1,90 @@
+.signup-container {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 24rem;
+  margin: 2rem auto;
+}
+
+.signup-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1e40af;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.error-message {
+  color: #dc2626;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.signup-form input {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+}
+
+.signup-form input:focus {
+  outline: none;
+  border-color: #1e40af;
+  box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+}
+
+.signup-btn {
+  background-color: #1e40af;
+  color: #ffffff;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.signup-btn:hover {
+  background-color: #1e3a8a;
+}
+
+@media (max-width: 640px) {
+  .signup-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .signup-title {
+    font-size: 1.25rem;
+  }
+}
+.password-container {
+  position: relative;
+}
+
+.password-container input[type="text"],
+.password-container input[type="password"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.password-container label {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.password-container input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
