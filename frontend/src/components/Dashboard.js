@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Dashboard.css';
+import { FaChartLine } from 'react-icons/fa'; // Install with `npm install react-icons`
 import api from '../api';
 
-function Dashboard({ userId, token }) {
+function Dashboard({ userId, token, setCredits }) {
   const [smsLogs, setSmsLogs] = useState([]);
   const [error, setError] = useState('');
 
@@ -37,7 +38,10 @@ function Dashboard({ userId, token }) {
 
   return (
     <div className="dashboard-container">
-      <h2 className="dashboard-title">ShunVerified Dashboard</h2>
+      <div className="hero-section">
+        <h2 className="hero-title">Welcome to ShunVerified</h2>
+        <p className="hero-subtitle">Manage your verifications with ease. <FaChartLine /> Active Numbers: 50+</p>
+      </div>
       {error && <p className="error-message">{error}</p>}
       <nav className="dashboard-nav">
         <Link to="/deposit" className="nav-link">Deposit Credits</Link> | 
