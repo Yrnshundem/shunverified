@@ -1,3 +1,23 @@
+.hero-section {
+  background: #2a5298;
+  padding: 1.5rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.hero-title {
+  color: #ffffff;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.hero-subtitle {
+  color: #bbf7d0;
+  font-size: 1rem;
+}
+
+
 .dashboard-container {
   background: rgba(255, 255, 255, 0.1);
   padding: 2rem;
