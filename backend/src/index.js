@@ -7,9 +7,11 @@ const paymentsRouter = require('./routes/payments');
 const Number = require('./models/Number');
 const SMSLog = require('./models/SMSLog');
 const User = require('./models/User');
+const cors = require('cors'); // Install with `npm install cors`
 const app = express();
 
 app.use(express.json());
+app.use(cors({ origin: 'https://shunverified.vercel.app' })); // Adjust origin to your frontend URL
 
 // Middleware to authenticate user
 const authenticateToken = (req, res, next) => {
@@ -126,3 +128,5 @@ app.post('/api/release-number', authenticateToken, async (req, res) => {
 app.listen(process.env.PORT || 5000, () => {
   console.log(`Server running on port ${process.env.PORT || 5000}`);
 });
+
+module.exports = app; // Export for testing if needed
