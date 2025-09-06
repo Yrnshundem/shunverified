@@ -90,17 +90,34 @@ function App() {
               </main>
             </div>
           ) : (
-            <div className="auth-container fade-in">
-              <Routes>
-                <Route path="/login" element={<Login onLogin={handleLogin} />} /> {/* Moved login to explicit path */}
-                <Route path="/signup" element={<Signup onLogin={handleLogin} />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/" element={<Login onLogin={handleLogin} />} /> {/* Default to login */}
-              </Routes>
-            </div>
-          )}
-        </div>
+<div className="auth-container fade-in">
+  <Routes>
+    <Route
+      path="/login"
+      element={<Login onLogin={handleLogin} />}
+    />
+    <Route
+      path="/signup"
+      element={<Signup onLogin={handleLogin} />}
+    />
+    <Route
+      path="/terms"
+      element={<Terms />}
+    />
+    <Route
+      path="/privacy"
+      element={<Privacy />}
+    />
+    <Route
+      path="/"
+      element={<Login onLogin={handleLogin} />}
+    />
+    <Route
+      path="*"
+      element={<div className="content-area"><h2>Page Not Found</h2></div>}
+    /> {/* Catch-all for undefined routes */}
+  </Routes>
+</div>
         <footer className="app-footer">
           <p>© 2025 ShunVerified. All rights reserved. | <a href="/terms">Terms</a> | <a href="/privacy">Privacy</a></p>
         </footer>
