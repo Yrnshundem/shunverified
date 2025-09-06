@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './Signup.css';
 import api from '../api';
 
@@ -7,18 +7,22 @@ function Signup({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // New state for toggle
-  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
-      await api.post('/api/auth/signup', { email, password });
-      const res = await api.post('/api/auth/login', { email, password });
-      onLogin(res.data.token, res.data.userId, res.data.credits);
-      navigate('/');
+      const res = await api.post('/api/signup', { email, password });
+      if (res.data.token && res.data.userId && res.data.credits) {
+        onLogin(res.data.token, res.data.userId, res.data.credits);
+      } else {
+        throw new Error('Incomplete signup response');
+      }
     } catch (error) {
-      setError('Signup failed, email may already exist');
+      const errorMsg = error.response?.data?.message || 'Signup failed';
+      setError(errorMsg);
+      console.error('Signup error:', error.response?.data || error.message);
     }
   };
 
@@ -27,7 +31,13 @@ function Signup({ onLogin }) {
       <h2 className="signup-title">Sign Up for ShunVerified</h2>
       {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleSubmit} className="signup-form">
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
         <div className="password-container">
           <input
             type={showPassword ? 'text' : 'password'}
@@ -46,6 +56,9 @@ function Signup({ onLogin }) {
         </div>
         <button type="submit" className="signup-btn">Sign Up</button>
       </form>
+      <p className="login-link">
+        Already have an account? <Link to="/login" className="login-link-text">Login</Link>
+      </p>
     </div>
   );
 }
