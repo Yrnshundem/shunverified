@@ -1,89 +1,54 @@
-
 import React, { useState, useEffect } from 'react';
-import api from '../api';
 import './RentNumber.css';
+import api from '../api';
 
-const RentNumber = ({ userId, token, setCredits }) => {
-  const [selectedService, setSelectedService] = useState('wa');
+function RentNumber({ userId, token, setCredits }) {
+  const [services, setServices] = useState([]);
+  const [selectedService, setSelectedService] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
   const [phone, setPhone] = useState('');
-  const [code, setCode] = useState('');
   const [activationId, setActivationId] = useState('');
   const [error, setError] = useState('');
-  const [credits, setLocalCredits] = useState(localStorage.getItem('credits') || 0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const services = {
-    wa: { name: 'WhatsApp', desc: 'Verify your WhatsApp account securely.' },
-    ti: { name: 'Tinder', desc: 'Get a number for Tinder verification.' },
-    vk: { name: 'VK', desc: 'Use a number for VK social media signup.' }
-  };
+  useEffect(() => {
+    setLoading(true);
+    api.get('/api/numbers/services', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        setServices(res.data.services || []);
+        setError('');
+      })
+      .catch(err => {
+        setError(`Failed to load services: ${err.response?.data?.message || err.message}`);
+        console.error('Services error:', err.response?.data || err.message);
+      })
+      .finally(() => setLoading(false));
+  }, [token]);
 
-  const requestNumber = async () => {
-    if (!token) {
-      setError('Please log in to rent a number');
+  const handleRent = async (e) => {
+    e.preventDefault();
+    if (!selectedService) {
+      setError('Please select a service');
       return;
     }
     setLoading(true);
     setError('');
     try {
-      const response = await api.post('/api/request-number', { service: selectedService, maxPrice: 20 }, {
+      const res = await api.post('/api/request-number', { service: selectedService, maxPrice }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (response.data.phone && response.data.activationId) {
-        setPhone(response.data.phone);
-        setActivationId(response.data.activationId);
-        const userRes = await api.get(`/api/auth/user/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setLocalCredits(userRes.data.credits);
-        setCredits(userRes.data.credits);
-        localStorage.setItem('credits', userRes.data.credits);
-      } else {
-        setError('Failed to request number: Invalid response');
-      }
-    } catch (err) {
-      setError(`Failed to request number: ${err.response?.data?.message || err.message}`);
-      console.error('Request error:', err.response?.data || err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let interval;
-    if (phone && activationId && token) {
-      interval = setInterval(async () => {
-        try {
-          const response = await api.get('/api/check-sms', {
-            params: { activationId },
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (response.data.code) {
-            setCode(response.data.code);
-            clearInterval(interval);
-          }
-        } catch (err) {
-          setError(`Failed to check SMS: ${err.response?.data?.message || err.message}`);
-          console.error('Check SMS error:', err.response?.data || err.message);
-        }
-      }, 5000);
-    }
-    return () => clearInterval(interval);
-  }, [phone, activationId, token]);
-
-  const releaseNumber = async () => {
-    setLoading(true);
-    try {
-      await api.post('/api/release-number', { activationId }, {
+      setPhone(res.data.phone);
+      setActivationId(res.data.activationId);
+      const userRes = await api.get(`/api/auth/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setPhone('');
-      setCode('');
-      setActivationId('');
-      setError('');
-    } catch (err) {
-      setError(`Failed to release number: ${err.response?.data?.message || err.message}`);
-      console.error('Release error:', err.response?.data || err.message);
+      setCredits(userRes.data.credits);
+      localStorage.setItem('credits', userRes.data.credits);
+    } catch (error) {
+      setError(`Failed to request number: ${error.response?.data?.message || error.message}`);
+      console.error('Rent number error:', error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
@@ -91,31 +56,31 @@ const RentNumber = ({ userId, token, setCredits }) => {
 
   return (
     <div className="rent-container">
-      <h2 className="rent-title">Rent a Verification Number</h2>
+      <h2 className="rent-title">Rent a Number</h2>
       {error && <p className="error-message">{error}</p>}
-      <div className="rent-form">
-        <div className="service-tooltip">
-          <select
-            value={selectedService}
-            onChange={(e) => setSelectedService(e.target.value)}
-            className="rent-select"
-          >
-            {Object.entries(services).map(([code, { name }]) => (
-              <option key={code} value={code}>{name}</option>
+      {loading ? <p className="loading-message">Loading services...</p> : (
+        <form onSubmit={handleRent} className="rent-form">
+          <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)} className="rent-select" required>
+            <option value="">Select a service</option>
+            {services.map(service => (
+              <option key={service} value={service}>{service}</option>
             ))}
           </select>
-          <span className="tooltip-text">{services[selectedService].desc}</span>
-        </div>
-        <button onClick={requestNumber} className="rent-btn" disabled={loading || !token || credits < 1}>
-          {loading ? <div className="loading-spinner"></div> : 'Get Number (1 Credit)'}
-        </button>
-        {phone && <p className="rent-success">Your number: {phone}</p>}
-        {code && <p className="rent-success">Your code: {code}</p>}
-        {code && <button onClick={releaseNumber} className="rent-btn">Release Number</button>}
-        {token && <p className="credits-display">Credits: {credits}</p>}
-      </div>
+          <input
+            type="number"
+            placeholder="Max Price (optional)"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            className="rent-input"
+          />
+          <button type="submit" className="rent-btn" disabled={loading}>
+            {loading ? 'Requesting...' : 'Get Number (1 credit)'}
+          </button>
+          {phone && <p className="rent-phone">Phone: {phone} (Activation ID: {activationId})</p>}
+        </form>
+      )}
     </div>
   );
-};
+}
 
 export default RentNumber;
