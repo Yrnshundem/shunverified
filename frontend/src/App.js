@@ -8,6 +8,10 @@ import Dashboard from './components/Dashboard';
 import RentNumber from './components/RentNumber';
 import api from './api';
 
+// Placeholder components
+const Terms = () => <div className="content-area"><h2>Terms of Service</h2><p>Terms content here.</p></div>;
+const Privacy = () => <div className="content-area"><h2>Privacy Policy</h2><p>Privacy content here.</p></div>;
+
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [userId, setUserId] = useState(localStorage.getItem('userId'));
@@ -88,8 +92,11 @@ function App() {
           ) : (
             <div className="auth-container fade-in">
               <Routes>
-                <Route path="/" element={<Login onLogin={handleLogin} />} />
+                <Route path="/login" element={<Login onLogin={handleLogin} />} /> {/* Moved login to explicit path */}
                 <Route path="/signup" element={<Signup onLogin={handleLogin} />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/" element={<Login onLogin={handleLogin} />} /> {/* Default to login */}
               </Routes>
             </div>
           )}
