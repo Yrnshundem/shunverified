@@ -1,9 +1,53 @@
-// Placeholder for future automated verification (optional)
+const axios = require('axios');
+
+// Placeholder for future automated verification
 async function verifyTransaction(currency, txId, amount, walletAddress) {
-  // For MVP, assume manual verification via Noones wallet
-  // Add BlockCypher (BTC) or BSCScan (USDT BEP-20) later
-  console.log(`Verify ${currency} tx ${txId} for ${amount} to ${walletAddress}`);
-  return true; // Simulate success for now
+  try {
+    console.log(`Verifying ${currency} tx ${txId} for ${amount} to ${walletAddress}`);
+
+    // Simulate manual verification for MVP
+    if (process.env.NODE_ENV === 'development' || process.env.MVP_MODE === 'true') {
+      console.log('MVP mode: Skipping automated verification, assuming manual check via Noones wallet.');
+      return { success: true, credits: amount * getPricePerCredit(currency) }; // Placeholder credit calculation
+    }
+
+    // Future automated verification (to be implemented)
+    let apiResponse;
+    switch (currency.toLowerCase()) {
+      case 'btc':
+        apiResponse = await axios.get(`https://api.blockcypher.com/v1/btc/main/txs/${txId}`);
+        if (apiResponse.data && apiResponse.data.total > amount * 1e8) { // Convert BTC to satoshis (1 BTC = 1e8 satoshis)
+          return { success: true, credits: amount * getPricePerCredit(currency) };
+        }
+        break;
+      case 'usdt':
+        apiResponse = await axios.get(`https://api.bscscan.com/api`, {
+          params: {
+            module: 'transaction',
+            action: 'gettransactionreceipt',
+            txhash: txId,
+            apikey: process.env.BSCSCAN_API_KEY, // Add to environment variables
+          },
+        });
+        if (apiResponse.data.result && apiResponse.data.result.status === '1') {
+          return { success: true, credits: amount * getPricePerCredit(currency) };
+        }
+        break;
+      default:
+        throw new Error('Unsupported currency');
+    }
+    return { success: false, message: 'Transaction not confirmed' };
+  } catch (error) {
+    console.error(`Verification error for ${currency} tx ${txId}:`, error.message);
+    return { success: false, message: 'Verification failed' };
+  }
+}
+
+// Helper function to get price per credit (placeholder, adjust based on market or fixed rate)
+function getPricePerCredit(currency) {
+  // Example: 1 BTC = 1000 credits, 1 USDT = 1 credit (adjust as needed)
+  const rates = { btc: 1000, usdt: 1 };
+  return rates[currency.toLowerCase()] || 1;
 }
 
 module.exports = { verifyTransaction };
