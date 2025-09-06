@@ -9,10 +9,21 @@ const RentNumber = ({ userId, token, setCredits }) => {
   const [activationId, setActivationId] = useState('');
   const [error, setError] = useState('');
   const [credits, setLocalCredits] = useState(localStorage.getItem('credits') || 0);
+  const [loading, setLoading] = useState(false);
 
-  const services = { wa: 'WhatsApp', ti: 'Tinder', vk: 'VK' };
+  const services = {
+    wa: { name: 'WhatsApp', desc: 'Verify your WhatsApp account securely.' },
+    ti: { name: 'Tinder', desc: 'Get a number for Tinder verification.' },
+    vk: { name: 'VK', desc: 'Use a number for VK social media signup.' }
+  };
 
   const requestNumber = async () => {
+    if (!token) {
+      setError('Please log in to rent a number');
+      return;
+    }
+    setLoading(true);
+    setError('');
     try {
       const response = await api.post('/api/request-number', { service: selectedService, maxPrice: 20 }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -32,6 +43,8 @@ const RentNumber = ({ userId, token, setCredits }) => {
     } catch (err) {
       setError(`Failed to request number: ${err.response?.data?.message || err.message}`);
       console.error('Request error:', err.response?.data || err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,6 +71,7 @@ const RentNumber = ({ userId, token, setCredits }) => {
   }, [phone, activationId, token]);
 
   const releaseNumber = async () => {
+    setLoading(true);
     try {
       await api.post('/api/release-number', { activationId }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -69,6 +83,8 @@ const RentNumber = ({ userId, token, setCredits }) => {
     } catch (err) {
       setError(`Failed to release number: ${err.response?.data?.message || err.message}`);
       console.error('Release error:', err.response?.data || err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,17 +93,20 @@ const RentNumber = ({ userId, token, setCredits }) => {
       <h2 className="rent-title">Rent a Verification Number</h2>
       {error && <p className="error-message">{error}</p>}
       <div className="rent-form">
-        <select
-          value={selectedService}
-          onChange={(e) => setSelectedService(e.target.value)}
-          className="rent-select"
-        >
-          {Object.entries(services).map(([code, name]) => (
-            <option key={code} value={code}>{name}</option>
-          ))}
-        </select>
-        <button onClick={requestNumber} className="rent-btn" disabled={!token}>
-          Get Number (Cost: 1 Credit)
+        <div className="service-tooltip">
+          <select
+            value={selectedService}
+            onChange={(e) => setSelectedService(e.target.value)}
+            className="rent-select"
+          >
+            {Object.entries(services).map(([code, { name }]) => (
+              <option key={code} value={code}>{name}</option>
+            ))}
+          </select>
+          <span className="tooltip-text">{services[selectedService].desc}</span>
+        </div>
+        <button onClick={requestNumber} className="rent-btn" disabled={loading || !token || credits < 1}>
+          {loading ? <div className="loading-spinner"></div> : 'Get Number (1 Credit)'}
         </button>
         {phone && <p className="rent-success">Your number: {phone}</p>}
         {code && <p className="rent-success">Your code: {code}</p>}
