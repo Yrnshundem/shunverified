@@ -3,6 +3,7 @@ import QRCode from 'qrcode.react';
 import './Deposit.css';
 import api from '../api';
 
+
 function Deposit({ userId, token, setCredits }) {
   const [depositInfo, setDepositInfo] = useState({});
   const [amount, setAmount] = useState('');
