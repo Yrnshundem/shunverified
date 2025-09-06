@@ -1,28 +1,79 @@
 const express = require('express');
+const axios = require('axios');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const dotenv = require('dotenv');
-
-dotenv.config();
-
+const loginRouter = require('./routes/login');
+const signupRouter = require('./routes/signup');
 const app = express();
-app.use(cors());
+
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB error:', err));
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
-// Routes
-const authRoutes = require('./routes/auth');
-const paymentRoutes = require('./routes/payments');
-const numberRoutes = require('./routes/numbers');
+app.use('/api', loginRouter);
+app.use('/api', signupRouter);
 
-app.use('/api/auth', authRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/numbers', numberRoutes);
+const API_KEY = process.env.SMS_ACTIVATE_API_KEY;
+const BASE_URL = 'https://api.sms-activate.ae/stubs/handler_api.php';
 
-app.get('/', (req, res) => res.send('ShunVerified API'));
+app.post('/api/request-number', async (req, res) => {
+  const { service, maxPrice } = req.body;
+  try {
+    const response = await axios.get(BASE_URL, {
+      params: {
+        api_key: API_KEY,
+        action: 'getNumber',
+        service: `${service}_0`,
+        country: 0,
+        maxPrice: maxPrice || undefined,
+      },
+    });
+    const data = response.data;
+    if (data.status === 'success') {
+      res.json({ phone: data.phone, activationId: data.activationId });
+    } else {
+      res.status(400).json({ message: data.message });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server on port ${PORT}`));
+app.get('/api/check-sms', async (req, res) => {
+  const { activationId } = req.query;
+  try {
+    const response = await axios.get(BASE_URL, {
+      params: {
+        api_key: API_KEY,
+        action: 'getStatus',
+        id: activationId,
+      },
+    });
+    const data = response.data;
+    if (data.status === 'success' && data.smsCode) {
+      res.json({ code: data.smsCode[0], text: data.smsText });
+    } else {
+      res.json({ status: data.status });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/api/release-number', async (req, res) => {
+  const { activationId } = req.body;
+  try {
+    const response = await axios.get(BASE_URL, {
+      params: {
+        api_key: API_KEY,
+        action: 'setStatus',
+        id: activationId,
+        status: 8,
+      },
+    });
+    res.json({ message: response.data });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.listen(process.env.PORT || 5000);
