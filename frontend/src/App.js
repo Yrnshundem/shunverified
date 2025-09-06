@@ -74,8 +74,8 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Dashboard userId={userId} token={token} setCredits={setCredits} />} />
                   <Route path="/deposit" element={<Deposit userId={userId} token={token} setCredits={setCredits} />} />
-                  <Route path="/rent" element={<RentNumber userId={userId} token={token} setCredits={setCredits} />} />
-                </Routes>
+<Route path="/rent" element={<RentNumber userId={userId} token={token} setCredits={setCredits} />} />
+  </Routes>
               </main>
             </div>
           ) : (
