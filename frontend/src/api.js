@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = process.env.REACT_APP_API_URL || 'https://shunverified.onrender.com';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 const baseURL = isDevelopment ? 'http://localhost:5000' : API_URL;
