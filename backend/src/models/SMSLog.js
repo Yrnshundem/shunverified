@@ -1,10 +1,12 @@
-const mongoose = require('mongoose');
+lconst mongoose = require('mongoose');
 
 const SMSLogSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   phoneNumber: { type: String, required: true },
   service: { type: String, required: true },
   message: { type: String, required: true },
+  activationId: { type: String }, // Link to Number model
+  isDelivered: { type: Boolean, default: false },
   receivedAt: { type: Date, default: Date.now }
 });
 
