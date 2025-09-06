@@ -6,7 +6,7 @@ import Signup from './components/Signup';
 import Deposit from './components/Deposit';
 import Dashboard from './components/Dashboard';
 import RentNumber from './components/RentNumber';
-import api from './api'; // Assuming api is in src/api.js
+import api from './api';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -29,15 +29,14 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('credits');
-    window.location.href = '/'; // Redirect to root to trigger login route
+    window.location.href = '/';
   };
 
-  // Real-time credit update
   useEffect(() => {
     let interval;
     if (userId && token) {
       interval = setInterval(() => {
-        api.get(`/api/user/${userId}`, { // Adjusted to match likely backend route
+        api.get(`/api/auth/user/${userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
           .then(res => {
@@ -48,38 +47,49 @@ function App() {
             }
           })
           .catch(err => console.log('Error fetching credits:', err.response?.data || err.message));
-      }, 60000); // Check every minute
+      }, 60000);
     }
-    return () => clearInterval(interval); // Cleanup on unmount or state change
+    return () => clearInterval(interval);
   }, [userId, token, credits]);
 
   return (
     <Router>
-      <div className="app-container">
-        <h1 className="app-title">ShunVerified</h1>
-        {token ? (
-          <div className="content-container">
-            <div className="user-info">
-              <p>Credits: {credits}</p>
-              <button onClick={handleLogout} className="logout-btn">Logout</button>
+      <div className="app-wrapper">
+        <header className="app-header">
+          <h1 className="app-logo">ShunVerified</h1>
+          {token && <p className="credits-display">Credits: {credits}</p>}
+        </header>
+        <div className="main-content">
+          {token ? (
+            <div className="dashboard-layout">
+              <aside className="sidebar">
+                <nav className="sidebar-nav">
+                  <Link to="/" className="nav-item">Dashboard</Link>
+                  <Link to="/deposit" className="nav-item">Deposit</Link>
+                  <Link to="/rent" className="nav-item">Rent Number</Link>
+                  <button onClick={handleLogout} className="nav-item logout-btn">Logout</button>
+                </nav>
+              </aside>
+              <main className="content-area fade-in">
+                <Routes>
+                  <Route path="/" element={<Dashboard userId={userId} token={token} setCredits={setCredits} />} />
+                  <Route path="/deposit" element={<Deposit userId={userId} token={token} setCredits={setCredits} />} />
+                  <Route path="/rent" element={<RentNumber userId={userId} token={token} setCredits={setCredits} />} />
+                </Routes>
+              </main>
             </div>
-            <nav className="nav-links">
-              <Link to="/" className="nav-link">Dashboard</Link> |
-              <Link to="/deposit" className="nav-link">Deposit</Link> |
-              <Link to="/rent" className="nav-link">Rent Number</Link>
-            </nav>
-            <Routes>
-              <Route path="/" element={<Dashboard userId={userId} token={token} setCredits={setCredits} />} />
-              <Route path="/deposit" element={<Deposit userId={userId} token={token} setCredits={setCredits} />} />
-              <Route path="/rent" element={<RentNumber userId={userId} token={token} setCredits={setCredits} />} />
-            </Routes>
-          </div>
-        ) : (
-          <Routes>
-            <Route path="/" element={<Login onLogin={handleLogin} />} />
-            <Route path="/signup" element={<Signup onLogin={handleLogin} />} />
-          </Routes>
-        )}
+          ) : (
+            <div className="auth-container fade-in">
+              <Routes>
+                <Route path="/" element={<Login onLogin={handleLogin} />} />
+                <Route path="/signup" element={<Signup onLogin={handleLogin} />} />
+              </Routes>
+            </div>
+          )}
+        </div>
+        <footer className="app-footer">
+          <p>© 2025 ShunVerified. All rights reserved. | <a href="/terms">Terms</a> | <a href="/privacy">Privacy</a></p>
+        </footer>
       </div>
     </Router>
   );
