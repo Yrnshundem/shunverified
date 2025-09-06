@@ -8,28 +8,32 @@ import Dashboard from './components/Dashboard';
 import RentNumber from './components/RentNumber';
 import api from './api';
 
-
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [userId, setUserId] = useState(localStorage.getItem('userId'));
-  const [credits, setCredits] = useState(localStorage.getItem('credits') || 0);
+  const [credits, setCredits] = useState(parseInt(localStorage.getItem('credits')) || 0);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = (newToken, newUserId, newCredits) => {
+    setLoading(true);
     setToken(newToken);
     setUserId(newUserId);
     setCredits(newCredits);
     localStorage.setItem('token', newToken);
     localStorage.setItem('userId', newUserId);
     localStorage.setItem('credits', newCredits);
+    setLoading(false);
   };
 
   const handleLogout = () => {
+    setLoading(true);
     setToken(null);
     setUserId(null);
     setCredits(0);
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('credits');
+    setLoading(false);
     window.location.href = '/';
   };
 
@@ -47,7 +51,7 @@ function App() {
               localStorage.setItem('credits', newCredits);
             }
           })
-          .catch(err => console.log('Error fetching credits:', err.response?.data || err.message));
+          .catch(err => console.error('Error fetching credits:', err.response?.data || err.message));
       }, 60000);
     }
     return () => clearInterval(interval);
@@ -61,7 +65,9 @@ function App() {
           {token && <p className="credits-display">Credits: {credits}</p>}
         </header>
         <div className="main-content">
-          {token ? (
+          {loading ? (
+            <div className="loading">Loading...</div>
+          ) : token ? (
             <div className="dashboard-layout">
               <aside className="sidebar">
                 <nav className="sidebar-nav">
@@ -75,8 +81,8 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Dashboard userId={userId} token={token} setCredits={setCredits} />} />
                   <Route path="/deposit" element={<Deposit userId={userId} token={token} setCredits={setCredits} />} />
-<Route path="/rent" element={<RentNumber userId={userId} token={token} setCredits={setCredits} />} />
-  </Routes>
+                  <Route path="/rent" element={<RentNumber userId={userId} token={token} setCredits={setCredits} />} />
+                </Routes>
               </main>
             </div>
           ) : (
