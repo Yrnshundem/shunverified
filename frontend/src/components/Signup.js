@@ -13,14 +13,14 @@ function Signup({ onLogin }) {
     e.preventDefault();
     setError('');
     try {
-      const res = await api.post('/api/signup', { email, password });
+      const res = await api.post('/api/auth/signup', { email, password });
       if (res.data.token && res.data.userId && res.data.credits) {
         onLogin(res.data.token, res.data.userId, res.data.credits);
       } else {
         throw new Error('Incomplete signup response');
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.message || 'Signup failed';
+      const errorMsg = error.response?.data?.error || 'Signup failed';
       setError(errorMsg);
       console.error('Signup error:', error.response?.data || error.message);
     }
