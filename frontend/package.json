@@ -9,8 +9,7 @@
     "qrcode.react": "^3.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.0",
-    "react-icons": "^4.12.0" // Added
+    "react-router-dom": "^6.26.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -31,4 +30,15 @@
       "last 1 safari version"
     ]
   }
+}
+
+"dependencies": {
+  "axios": "^1.7.2",
+  "jwt-decode": "^4.0.0",
+  "mongoose": "^8.18.0",
+  "qrcode.react": "^3.1.0",
+  "react": "^18.3.1",
+  "react-dom": "^18.3.1",
+  "react-router-dom": "^6.26.0",
+  "react-icons": "^4.12.0"
 }
