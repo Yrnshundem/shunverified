@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const User = require('../models/User');
+const { verifyTransaction } = require('../services/crypto');
 
 const router = express.Router();
 
@@ -25,16 +26,18 @@ router.post('/deposit', async (req, res) => {
   }
   if (amount <= 0) return res.status(400).json({ error: 'Amount must be positive' });
   try {
-    const priceResponse = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${currency.toLowerCase()}&vs_currencies=usd`);
-    const price = priceResponse.data[currency.toLowerCase()].usd;
-    const credits = amount * price;
-    const user = await User.findById(userId);
-    if (user) {
-      user.credits += credits; // Manual verification assumed
-      await user.save();
-      res.json({ message: 'Deposit verified. Credits added.' });
+    const verification = await verifyTransaction(currency, txId, amount, currency === 'btc' ? process.env.BTC_ADDRESS : process.env.USDT_ADDRESS);
+    if (verification.success) {
+      const user = await User.findById(userId);
+      if (user) {
+        user.credits += verification.credits;
+        await user.save();
+        res.json({ message: 'Deposit verified. Credits added.' });
+      } else {
+        res.status(404).json({ error: 'User not found' });
+      }
     } else {
-      res.status(404).json({ error: 'User not found' });
+      res.status(400).json({ error: verification.message || 'Deposit not verified' });
     }
   } catch (error) {
     res.status(500).json({ error: 'Deposit processing failed' });
