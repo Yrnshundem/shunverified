@@ -6,6 +6,19 @@ const API_URL = process.env.REACT_APP_API_URL;
 // Fallback to localhost only if in development mode
 const isDevelopment = process.env.NODE_ENV === 'development';
 const baseURL = isDevelopment ? 'http://localhost:5000' : API_URL;
+const PORT = process.env.PORT || 5000;
+
+app.use(
+    cors({
+        origin: [
+            "https://shunverified.vercel.app/",
+            "http://localhost:3000"
+        ],
+        credentials: true,
+    })
+);
+
+app.use(express.json());
 
 const api = axios.create({
   baseURL: baseURL || '', // Ensure no undefined baseURL in production
