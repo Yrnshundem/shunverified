@@ -77,6 +77,7 @@ function Deposit({ userId, token, setCredits }) {
               <QRCode value={depositInfo.usdtAddress} size={128} />
             </div>
           )}
+          <p className="address-label">MoMo Number (MTN): 0248536079 - ONYX Base (Martha)</p>
           <p className="info-text">Credits will be added after verification (10-60 minutes).</p>
         </>
       )}
@@ -84,6 +85,7 @@ function Deposit({ userId, token, setCredits }) {
         <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="deposit-select">
           <option value="bitcoin">BTC</option>
           <option value="tether">USDT</option>
+          <option value="momo">MoMo</option>
         </select>
         <input type="number" placeholder="Amount (e.g., 0.001 BTC)" value={amount} onChange={(e) => setAmount(e.target.value)} required className="deposit-input" />
         <input type="text" placeholder="Transaction ID" value={txId} onChange={(e) => setTxId(e.target.value)} required className="deposit-input" />
@@ -91,6 +93,7 @@ function Deposit({ userId, token, setCredits }) {
           {loading ? 'Submitting...' : 'Submit Deposit'}
         </button>
       </form>
+      <p className="pricing-info">Pricing: $1 = 1 credit, $10 = 12 credits</p>
     </div>
   );
 }
