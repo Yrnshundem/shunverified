@@ -21,7 +21,7 @@ function Signup({ onLogin }) {
       }
     } catch (error) {
       const errorMsg = error.response?.data?.error || 'Signup failed';
-      setError(errorMsg);
+      setError(errorMsg === 'Email already exists' ? errorMsg : 'Signup failed');
       console.error('Signup error:', error.response?.data || error.message);
     }
   };
