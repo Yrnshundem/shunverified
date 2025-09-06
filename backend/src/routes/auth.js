@@ -5,6 +5,7 @@ const User = require('../models/User');
 
 const router = express.Router();
 
+// Signup
 router.post('/signup', async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -13,13 +14,14 @@ router.post('/signup', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ email, password: hashedPassword });
     await user.save();
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
     res.status(201).json({ token, userId: user._id, credits: user.credits });
   } catch (error) {
     res.status(500).json({ error: 'Signup failed' });
   }
 });
 
+// Login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -27,18 +29,19 @@ router.post('/login', async (req, res) => {
     if (!user || !await bcrypt.compare(password, user.password)) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
     res.json({ token, userId: user._id, credits: user.credits });
   } catch (error) {
     res.status(500).json({ error: 'Login failed' });
   }
 });
 
+// Get user info (credits)
 router.get('/user/:userId', async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).select('credits');
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json(user);
+    res.json({ credits: user.credits });
   } catch (error) {
     res.status(500).json({ error: 'Fetch user failed' });
   }
