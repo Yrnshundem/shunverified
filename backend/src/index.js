@@ -7,11 +7,12 @@ const paymentsRouter = require('./routes/payments');
 const Number = require('./models/Number');
 const SMSLog = require('./models/SMSLog');
 const User = require('./models/User');
-const cors = require('cors'); // Install with `npm install cors`
+const cors = require('cors');
+const jwt = require('jsonwebtoken'); // Added to fix jwt.verify error
 const app = express();
 
 app.use(express.json());
-app.use(cors({ origin: 'https://shunverified.vercel.app' })); // Adjust origin to your frontend URL
+app.use(cors({ origin: 'https://shunverified.vercel.app' })); // Adjust origin as needed
 
 // Middleware to authenticate user
 const authenticateToken = (req, res, next) => {
@@ -24,6 +25,11 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Add root route for health check
+app.get('/', (req, res) => {
+  res.json({ message: 'ShunVerified API is running', status: 'ok' });
+});
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err.message));
@@ -34,8 +40,8 @@ app.use('/api/payments', paymentsRouter);
 
 const API_KEY = process.env.SMS_ACTIVATE_API_KEY;
 const BASE_URL = 'https://api.sms-activate.ae/stubs/handler_api.php';
-const jwt = require('jsonwebtoken');
 
+// API routes
 app.post('/api/request-number', authenticateToken, async (req, res) => {
   const { service, maxPrice } = req.body;
   try {
@@ -123,6 +129,11 @@ app.post('/api/release-number', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
+});
+
+// Basic error handling for uncaught routes
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
 });
 
 app.listen(process.env.PORT || 5000, () => {
