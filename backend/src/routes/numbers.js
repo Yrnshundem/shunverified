@@ -3,12 +3,34 @@ const axios = require('axios');
 const Number = require('../models/Number');
 const SMSLog = require('../models/SMSLog');
 const User = require('../models/User');
+const authenticateToken = require('../middleware/auth'); // Assuming this exists
 const router = express.Router();
 
 const API_KEY = process.env.SMS_ACTIVATE_API_KEY;
 const BASE_URL = 'https://api.sms-activate.ae/stubs/handler_api.php';
 
-router.post('/rent', async (req, res) => {
+// Fetch available services
+router.get('/services', async (req, res) => {
+  try {
+    const response = await axios.get(BASE_URL, {
+      params: {
+        api_key: API_KEY,
+        action: 'getServices',
+      },
+    });
+    const data = response.data;
+    if (data.status === 'success') {
+      res.json({ services: data.services || [] });
+    } else {
+      res.status(400).json({ message: data.message || 'Failed to fetch services' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Rent a number
+router.post('/rent', authenticateToken, async (req, res) => {
   const { userId, service, maxPrice } = req.body;
   try {
     const user = await User.findById(userId);
@@ -19,7 +41,7 @@ router.post('/rent', async (req, res) => {
       params: {
         api_key: API_KEY,
         action: 'getNumber',
-        service: `${service}_0`,
+        service: `${service}_0`, // Adjust country code if needed
         country: 0,
         maxPrice: maxPrice || 10,
       },
@@ -40,13 +62,14 @@ router.post('/rent', async (req, res) => {
       await user.save();
       res.json({ phoneNumber: data.phone, activationId: data.activationId, message: 'Number rented' });
     } else {
-      res.status(400).json({ message: data.message });
+      res.status(400).json({ message: data.message || 'Failed to rent number' });
     }
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
 });
 
+// Check SMS status
 router.get('/check-sms', async (req, res) => {
   const { activationId } = req.query;
   try {
@@ -73,7 +96,8 @@ router.get('/check-sms', async (req, res) => {
   }
 });
 
-router.post('/release', async (req, res) => {
+// Release number
+router.post('/release', authenticateToken, async (req, res) => {
   const { activationId } = req.body;
   try {
     const response = await axios.get(BASE_URL, {
@@ -86,7 +110,8 @@ router.post('/release', async (req, res) => {
   }
 });
 
-router.get('/sms/all', async (req, res) => {
+// Get all SMS logs for a user
+router.get('/sms/all', authenticateToken, async (req, res) => {
   const { userId } = req.query;
   try {
     const logs = await SMSLog.find({ userId }).sort({ receivedAt: -1 });
