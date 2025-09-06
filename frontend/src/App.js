@@ -29,7 +29,6 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('credits');
-    // Force a re-render to ensure login page shows
     window.location.href = '/'; // Redirect to root to trigger login route
   };
 
@@ -38,7 +37,7 @@ function App() {
     let interval;
     if (userId && token) {
       interval = setInterval(() => {
-        api.get(`/api/auth/user/${userId}`, {
+        api.get(`/api/user/${userId}`, { // Adjusted to match likely backend route
           headers: { Authorization: `Bearer ${token}` }
         })
           .then(res => {
@@ -48,11 +47,11 @@ function App() {
               localStorage.setItem('credits', newCredits);
             }
           })
-          .catch(err => console.log('Error fetching credits:', err));
+          .catch(err => console.log('Error fetching credits:', err.response?.data || err.message));
       }, 60000); // Check every minute
     }
     return () => clearInterval(interval); // Cleanup on unmount or state change
-  }, [userId, token, credits]); // Dependencies
+  }, [userId, token, credits]);
 
   return (
     <Router>
